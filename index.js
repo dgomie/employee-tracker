@@ -65,6 +65,7 @@ inquirer
     }
   });
 
+
 function addEmployee() {
   inquirer
     .prompt([
@@ -92,7 +93,7 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
-      console.log(newEmployee);
+        console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database.`);
     });
 }
 
@@ -106,7 +107,7 @@ function addDepartment() {
       },
     ])
     .then((newDepartment) => {
-      console.log(newDepartment);
+        console.log(`Added ${newDepartment.deptName} to the database.`);
     });
 }
 
@@ -131,9 +132,14 @@ function addRole() {
       },
     ])
     .then((newRole) => {
+      console.log(`Added ${newRole.roleName} to the database.`);
       console.log(newRole);
     });
 }
+
+// function updateRole() {
+
+// }
 
 function displayTable(choice) {
   db.query(`SELECT * FROM ${choice}`, function (err, results) {
@@ -144,3 +150,4 @@ function displayTable(choice) {
     }
   });
 }
+
