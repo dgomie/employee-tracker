@@ -40,7 +40,7 @@ inquirer
 
     switch (response.operation) {
       case "View All Employees":
-        displayEmployees();
+        displayTable("employees");
         break;
       case "Add Employee":
         addEmployee();
@@ -49,13 +49,13 @@ inquirer
         console.log("Create function to ask for new role");
         break;
       case "View All Roles":
-        console.log("Displaying all roles");
+        displayTable("roles");
         break;
       case "Add Role":
         addRole();
         break;
       case "View All Departments":
-        console.log("Displaying all departments");
+        displayTable("departments");
         break;
       case "Add Department":
         addDepartment();
@@ -135,8 +135,8 @@ function addRole() {
     });
 }
 
-function displayEmployees() {
-  db.query("SELECT * FROM EMPLOYEES", function (err, results) {
+function displayTable(choice) {
+  db.query(`SELECT * FROM ${choice}`, function (err, results) {
     if (err) {
       console.error(err);
     } else {
