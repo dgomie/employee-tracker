@@ -65,7 +65,6 @@ inquirer
     }
   });
 
-
 function addEmployee() {
   inquirer
     .prompt([
@@ -93,7 +92,9 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
-        console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database.`);
+      console.log(
+        `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database.`
+      );
     });
 }
 
@@ -107,11 +108,21 @@ function addDepartment() {
       },
     ])
     .then((newDepartment) => {
-        console.log(`Added ${newDepartment.deptName} to the database.`);
+      console.log(`Added ${newDepartment.deptName} to the database.`);
     });
 }
 
 function addRole() {
+  let currentDept = [];
+  db.query("SELECT * FROM departments", function (err, results) {
+    if (err) {
+      console.error(err);
+    } else {
+      results.forEach((result) => {
+        currentDept.push(result.department_name);
+      });
+    }
+  });
   inquirer
     .prompt([
       {
@@ -128,18 +139,22 @@ function addRole() {
         type: "list",
         message: "What department does the role belong to?",
         name: "roleDept",
-        choices: departments,
+        choices: currentDept,
       },
     ])
     .then((newRole) => {
-      console.log(`Added ${newRole.roleName} to the database.`);
-      console.log(newRole);
+      const sql = `INSERT INTO roles (job_title, salary, department_id)
+      VALUES (?,?,?)`;
+      const params = [newRole.roleName, newRole.roleSalary, newRole.roleDept]; // need to convert name of dept to id#
+      db.query(sql, params, function (err, results) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`Added ${newRole.roleName} to the database.`);
+        }
+      });
     });
 }
-
-// function updateRole() {
-
-// }
 
 function displayTable(choice) {
   db.query(`SELECT * FROM ${choice}`, function (err, results) {
@@ -150,4 +165,3 @@ function displayTable(choice) {
     }
   });
 }
-
