@@ -66,6 +66,17 @@ inquirer
   });
 
 function addEmployee() {
+  let currentRoles = [];
+  db.query("SELECT * FROM roles", function (err, results) {
+    if (err) {
+      console.error(err);
+    } else {
+      results.forEach((result) => {
+        currentRoles.push(result.job_title);
+      });
+    }
+  });
+
   inquirer
     .prompt([
       {
@@ -82,7 +93,7 @@ function addEmployee() {
         type: "list",
         message: "What is the employee's role",
         name: "role",
-        choices: roles,
+        choices: currentRoles,
       },
       {
         type: "list",
@@ -92,9 +103,19 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
-      console.log(
-        `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database.`
-      );
+      const sql = `INSERT INTO employees (first_name, last_name)
+      VALUES (?,?)`; //need to add manager_id and role_id
+      const params = [newEmployee.firstName, newEmployee.lastName];
+      db.query(sql, params, function (err, results) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(
+            `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
+          );
+        }
+      });
+      console.log("New employee added");
     });
 }
 
@@ -108,7 +129,16 @@ function addDepartment() {
       },
     ])
     .then((newDepartment) => {
-      console.log(`Added ${newDepartment.deptName} to the database.`);
+      const sql = `INSERT INTO departments (department_name)
+      VALUES (?)`;
+      const params = [newDepartment.deptName];
+      db.query(sql, params, function (err, results) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(`Added ${newDepartment.deptName} to the database.`);
+        }
+      });
     });
 }
 
@@ -143,9 +173,10 @@ function addRole() {
       },
     ])
     .then((newRole) => {
+      // TODO: Convert name of dept to its corresponding id
       const sql = `INSERT INTO roles (job_title, salary, department_id)
       VALUES (?,?,?)`;
-      const params = [newRole.roleName, newRole.roleSalary, newRole.roleDept]; // need to convert name of dept to id#
+      const params = [newRole.roleName, newRole.roleSalary, newRole.roleDept];
       db.query(sql, params, function (err, results) {
         if (err) {
           console.error(err);
@@ -157,11 +188,44 @@ function addRole() {
 }
 
 function displayTable(choice) {
-  db.query(`SELECT * FROM ${choice}`, function (err, results) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.table(results);
-    }
-  });
+  switch (choice) {
+    case "employees":
+      db.query(
+        "SELECT e.first_name, e.last_name, r.job_title title, d.department_name department, r.salary FROM employees e INNER JOIN roles r ON e.role_ID = r.id INNER JOIN departments d ON r.department_id = d.id",
+        function (err, results) {
+          if (err) {
+            console.error(err);
+          } else {
+            console.table(results);
+          }
+        }
+      );
+      break;
+
+    case "roles":
+      db.query(
+        "SELECT r.job_title, d.department_name, r.salary FROM departments d JOIN roles r ON d.id = r.department_id",
+        function (err, results) {
+          if (err) {
+            console.error(err);
+          } else {
+            console.table(results);
+          }
+        }
+      );
+      break;
+
+    default:
+      db.query(
+        `SELECT d.id, d.department_name name FROM departments d`,
+        function (err, results) {
+          if (err) {
+            console.error(err);
+          } else {
+            console.table(results);
+          }
+        }
+      );
+      break;
+  }
 }
