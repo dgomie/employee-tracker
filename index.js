@@ -22,7 +22,7 @@ const operationChoices = [
   "Add Department",
   "Quit",
 ];
-let managers = ["test1", "test2"];
+let managers = ["none", "test1", "test2"];
 
 inquirer
   .prompt([
@@ -101,19 +101,25 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
-      const sql = `INSERT INTO employees (first_name, last_name)
-      VALUES (?,?)`; //need to add manager_id and role_id
-      const params = [newEmployee.firstName, newEmployee.lastName];
-      db.query(sql, params, function (err, results) {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log(
-            `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
-          );
-        }
-      });
-      console.log("New employee added");
+        db.query("SELECT * FROM roles", function (err, results) {
+            results.forEach((result) => {
+                // compare the selected name to name in database in order to pull dept_id
+              if (result.job_title === newEmployee.role) {
+                const sql = `INSERT INTO employees (first_name, last_name, role_id)VALUES (?,?,?)`; //need to add manager_id and role_id
+                const params = [newEmployee.firstName, newEmployee.lastName, result.id];
+                console.log("params", params)
+
+                db.query(sql, params, function (err, results) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                    console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
+                    );
+                    }
+                })
+                }
+            });   
+        });
     });
 }
 
@@ -180,7 +186,7 @@ function addRole() {
       VALUES (?,?,?)`;
             const params = [newRole.roleName, newRole.roleSalary, result.id];
             console.log("params", params);
-            
+
              // Create new job row in roles table
             db.query(sql, params, function (err, results) {
               if (err) {
@@ -199,7 +205,7 @@ function displayTable(choice) {
   switch (choice) {
     case "employees":
       db.query(
-        "SELECT e.first_name, e.last_name, r.job_title title, d.department_name department, r.salary FROM employees e INNER JOIN roles r ON e.role_ID = r.id INNER JOIN departments d ON r.department_id = d.id",
+        "SELECT e.id, e.first_name, e.last_name, r.job_title title, d.department_name department, r.salary FROM employees e INNER JOIN roles r ON e.role_ID = r.id INNER JOIN departments d ON r.department_id = d.id",
         function (err, results) {
           if (err) {
             console.error(err);
