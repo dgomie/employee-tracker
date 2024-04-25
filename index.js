@@ -23,8 +23,6 @@ const operationChoices = [
   "Quit",
 ];
 let managers = ["test1", "test2"];
-let departments = ["dept1", "dept2"];
-let roles = ["role1", "role2"];
 
 inquirer
   .prompt([
@@ -173,16 +171,26 @@ function addRole() {
       },
     ])
     .then((newRole) => {
-      // TODO: Convert name of dept to its corresponding id
-      const sql = `INSERT INTO roles (job_title, salary, department_id)
+
+      db.query("SELECT * FROM departments", function (err, results) {
+        results.forEach((result) => {
+            // compare the selected name to name in database in order to pull dept_id
+          if (result.department_name === newRole.roleDept) {
+            const sql = `INSERT INTO roles (job_title, salary, department_id)
       VALUES (?,?,?)`;
-      const params = [newRole.roleName, newRole.roleSalary, newRole.roleDept];
-      db.query(sql, params, function (err, results) {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log(`Added ${newRole.roleName} to the database.`);
-        }
+            const params = [newRole.roleName, newRole.roleSalary, result.id];
+            console.log("params", params);
+            
+             // Create new job row in roles table
+            db.query(sql, params, function (err, results) {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log(`Added ${newRole.roleName} to the database.`);
+              }
+            });
+          }
+        });
       });
     });
 }
