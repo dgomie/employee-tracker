@@ -75,6 +75,19 @@ function addEmployee() {
     }
   });
 
+  let employeesArray = [{name: "none", id: null}];
+  db.query("SELECT * FROM employees", function (err, results) {
+    if (err) {
+      console.error(err);
+    } else {
+      results.forEach((result) => {
+        let fullName = `${result.first_name} ${result.last_name}`;
+        employeesArray.push({name: fullName, id: result.id});
+      });
+    //   console.log(employeesArray)
+    }
+  });
+
   inquirer
     .prompt([
       {
@@ -97,24 +110,31 @@ function addEmployee() {
         type: "list",
         message: "Who is the employee's manager?",
         name: "manager",
-        choices: managers,
+        choices: employeesArray,
       },
     ])
     .then((newEmployee) => {
+       
         db.query("SELECT * FROM roles", function (err, results) {
+            0 
             results.forEach((result) => {
                 // compare the selected name to name in database in order to pull dept_id
               if (result.job_title === newEmployee.role) {
-                const sql = `INSERT INTO employees (first_name, last_name, role_id)VALUES (?,?,?)`; //need to add manager_id and role_id
-                const params = [newEmployee.firstName, newEmployee.lastName, result.id];
-                console.log("params", params)
-
-                db.query(sql, params, function (err, results) {
-                    if (err) {
-                        console.error(err);
-                    } else {
-                    console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
-                    );
+                employeesArray.forEach((employee) => {
+                    if (employee.name === newEmployee.manager) {
+                        let newEmployeeManagerId = employee.id;
+                        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)VALUES (?,?,?,?)`; //need to add manager_id and role_id
+                        const params = [newEmployee.firstName, newEmployee.lastName, result.id, newEmployeeManagerId];
+                        console.log("params", params)
+        
+                        db.query(sql, params, function (err, results) {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                            console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
+                            );
+                            }
+                        })
                     }
                 })
                 }
@@ -205,7 +225,7 @@ function displayTable(choice) {
   switch (choice) {
     case "employees":
       db.query(
-        "SELECT e.id, e.first_name, e.last_name, r.job_title title, d.department_name department, r.salary FROM employees e INNER JOIN roles r ON e.role_ID = r.id INNER JOIN departments d ON r.department_id = d.id",
+        "SELECT e1.id, e1.first_name, e1.last_name, r.job_title title, d.department_name department, r.salary, CONCAT(e2.first_name, ' ', e2.last_name) AS manager FROM employees e1 INNER JOIN roles r ON e1.role_ID = r.id INNER JOIN departments d ON r.department_id = d.id LEFT JOIN employees e2 ON e1.manager_id = e2.id",
         function (err, results) {
           if (err) {
             console.error(err);
@@ -243,3 +263,4 @@ function displayTable(choice) {
       break;
   }
 }
+
