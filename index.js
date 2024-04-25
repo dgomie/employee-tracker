@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const { PASSWORD } = require("./password");
+const header = require('./assets/ascii/header')
 
 const db = mysql.createConnection(
   {
@@ -11,6 +12,7 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the dunder_db database.`)
 );
+console.log(header)
 
 const operationChoices = [
   "View All Employees",
@@ -74,14 +76,14 @@ function addEmployee() {
     }
   });
 
-  let employeesArray = [{name: "none", id: null}];
+  let employeesArray = [{ name: "none", id: null }];
   db.query("SELECT * FROM employees", function (err, results) {
     if (err) {
       console.error(err);
     } else {
       results.forEach((result) => {
         let fullName = `${result.first_name} ${result.last_name}`;
-        employeesArray.push({name: fullName, id: result.id});
+        employeesArray.push({ name: fullName, id: result.id });
       });
     }
   });
@@ -112,32 +114,37 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
-       
-        db.query("SELECT * FROM roles", function (err, results) {
-            0 
-            results.forEach((result) => {
-                // compare the selected name to name in database in order to pull dept_id
-              if (result.job_title === newEmployee.role) {
-                employeesArray.forEach((employee) => {
-                    if (employee.name === newEmployee.manager) {
-                        let newEmployeeManagerId = employee.id;
-                        const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)VALUES (?,?,?,?)`; //need to add manager_id and role_id
-                        const params = [newEmployee.firstName, newEmployee.lastName, result.id, newEmployeeManagerId];
-                        console.log("params", params)
-        
-                        db.query(sql, params, function (err, results) {
-                            if (err) {
-                                console.error(err);
-                            } else {
-                            console.log(`Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
-                            );
-                            }
-                        })
-                    }
-                })
-                }
-            });   
+      db.query("SELECT * FROM roles", function (err, results) {
+        0;
+        results.forEach((result) => {
+          // compare the selected name to name in database in order to pull dept_id
+          if (result.job_title === newEmployee.role) {
+            employeesArray.forEach((employee) => {
+              if (employee.name === newEmployee.manager) {
+                let newEmployeeManagerId = employee.id;
+                const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)VALUES (?,?,?,?)`; //need to add manager_id and role_id
+                const params = [
+                  newEmployee.firstName,
+                  newEmployee.lastName,
+                  result.id,
+                  newEmployeeManagerId,
+                ];
+                console.log("params", params);
+
+                db.query(sql, params, function (err, results) {
+                  if (err) {
+                    console.error(err);
+                  } else {
+                    console.log(
+                      `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
+                    );
+                  }
+                });
+              }
+            });
+          }
         });
+      });
     });
 }
 
@@ -195,17 +202,16 @@ function addRole() {
       },
     ])
     .then((newRole) => {
-
       db.query("SELECT * FROM departments", function (err, results) {
         results.forEach((result) => {
-            // compare the selected name to name in database in order to pull dept_id
+          // compare the selected name to name in database in order to pull dept_id
           if (result.department_name === newRole.roleDept) {
             const sql = `INSERT INTO roles (job_title, salary, department_id)
       VALUES (?,?,?)`;
             const params = [newRole.roleName, newRole.roleSalary, result.id];
             console.log("params", params);
 
-             // Create new job row in roles table
+            // Create new job row in roles table
             db.query(sql, params, function (err, results) {
               if (err) {
                 console.error(err);
@@ -220,56 +226,55 @@ function addRole() {
 }
 
 function updateEmployeeRole() {
-    let currentRoles = [];
-    db.query("SELECT * FROM roles", function (err, results) {
-      if (err) {
-        console.error(err);
-      } else {
-        results.forEach((result) => {
-          currentRoles.push({role: result.job_title, roleId: result.id});
-        });
-      }
-    });
-   
-  
-    let employeesArray = [];
-    db.query("SELECT * FROM employees", function (err, results) {
-      if (err) {
-        console.error(err);
-      } else {
-        results.forEach((result) => {
-          let fullName = `${result.first_name} ${result.last_name}`;
-          employeesArray.push({name: fullName, id: result.id});
-        });
-      }
-      console.log(employeesArray)
+  let currentRoles = [];
+  db.query("SELECT * FROM roles", function (err, results) {
+    if (err) {
+      console.error(err);
+    } else {
+      results.forEach((result) => {
+        currentRoles.push({ role: result.job_title, roleId: result.id });
+      });
+    }
+  });
+
+  let employeesArray = [];
+  db.query("SELECT * FROM employees", function (err, results) {
+    if (err) {
+      console.error(err);
+    } else {
+      results.forEach((result) => {
+        let fullName = `${result.first_name} ${result.last_name}`;
+        employeesArray.push({ name: fullName, id: result.id });
+      });
+    }
+    console.log(employeesArray);
 
     inquirer
-  .prompt([
-    {
-      type: "list",
-      message: "Which employee's role would you like to update?",
-      name: "employee",
-      choices: employeesArray,
-    },
-    {
-        type: "list",
-        message: "Which role do you want to assign the selected employee?",
-        name: "role",
-        choices: currentRoles,
-    }
-  ])
-  .then((response) => {
-    employeesArray.forEach((employee) => {
-        if (employee.name === response.employee){
-            const sql = 'UPDATE employees SET role_id = ? WHERE id = ?'
-            const params = [response. employee.id]
-
-            db.query()
-        }
-    })
+      .prompt([
+        {
+          type: "list",
+          message: "Which employee's role would you like to update?",
+          name: "employee",
+          choices: employeesArray,
+        },
+        {
+          type: "list",
+          message: "Which role do you want to assign the selected employee?",
+          name: "role",
+          choices: currentRoles,
+        },
+      ])
+      .then((response) => {
+        employeesArray.forEach((employee) => {
+          if (employee.name === response.employee) {
+            const sql = "UPDATE employees SET role_id = ? WHERE id = ?";
+            const params = [response.employee.id];
+            // TODO: need to grab new role id from role name to pass into the params
+            db.query();
+          }
+        });
+      });
   });
-});
 }
 
 function displayTable(choice) {
@@ -314,4 +319,3 @@ function displayTable(choice) {
       break;
   }
 }
-
