@@ -22,7 +22,6 @@ const operationChoices = [
   "Add Department",
   "Quit",
 ];
-let managers = ["none", "test1", "test2"];
 
 inquirer
   .prompt([
@@ -44,7 +43,7 @@ inquirer
         addEmployee();
         break;
       case "Update Employee Role":
-        console.log("Create function to ask for new role");
+        updateEmployeeRole();
         break;
       case "View All Roles":
         displayTable("roles");
@@ -84,7 +83,6 @@ function addEmployee() {
         let fullName = `${result.first_name} ${result.last_name}`;
         employeesArray.push({name: fullName, id: result.id});
       });
-    //   console.log(employeesArray)
     }
   });
 
@@ -219,6 +217,59 @@ function addRole() {
         });
       });
     });
+}
+
+function updateEmployeeRole() {
+    let currentRoles = [];
+    db.query("SELECT * FROM roles", function (err, results) {
+      if (err) {
+        console.error(err);
+      } else {
+        results.forEach((result) => {
+          currentRoles.push({role: result.job_title, roleId: result.id});
+        });
+      }
+    });
+   
+  
+    let employeesArray = [];
+    db.query("SELECT * FROM employees", function (err, results) {
+      if (err) {
+        console.error(err);
+      } else {
+        results.forEach((result) => {
+          let fullName = `${result.first_name} ${result.last_name}`;
+          employeesArray.push({name: fullName, id: result.id});
+        });
+      }
+      console.log(employeesArray)
+
+    inquirer
+  .prompt([
+    {
+      type: "list",
+      message: "Which employee's role would you like to update?",
+      name: "employee",
+      choices: employeesArray,
+    },
+    {
+        type: "list",
+        message: "Which role do you want to assign the selected employee?",
+        name: "role",
+        choices: currentRoles,
+    }
+  ])
+  .then((response) => {
+    employeesArray.forEach((employee) => {
+        if (employee.name === response.employee){
+            const sql = 'UPDATE employees SET role_id = ? WHERE id = ?'
+            const params = [response. employee.id]
+
+            db.query()
+        }
+    })
+  });
+});
 }
 
 function displayTable(choice) {

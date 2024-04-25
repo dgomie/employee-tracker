@@ -31,6 +31,7 @@
 
 
   ## Contributions  
+  https://stackoverflow.com/questions/8974328/mysql-multiple-joins-in-one-query
 
 
 
