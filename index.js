@@ -140,8 +140,9 @@ function addEmployee() {
                     console.error(err);
                   } else {
                     console.log(
-                      `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database`
+                      `Added ${newEmployee.firstName} ${newEmployee.lastName} to the database\n`
                     );
+                    init();
                   }
                 });
               }
@@ -169,7 +170,8 @@ function addDepartment() {
         if (err) {
           console.error(err);
         } else {
-          console.log(`Added ${newDepartment.deptName} to the database.`);
+          console.log(`Added ${newDepartment.deptName} to the database.\n`);
+          init();
         }
       });
     });
@@ -220,7 +222,8 @@ function addRole() {
               if (err) {
                 console.error(err);
               } else {
-                console.log(`Added ${newRole.roleName} to the database.`);
+                console.log(`Added ${newRole.roleName} to the database.\n`);
+                init();
               }
             });
           }
