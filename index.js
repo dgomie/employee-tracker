@@ -14,55 +14,59 @@ const db = mysql.createConnection(
 );
 console.log(header)
 
-const operationChoices = [
-  "View All Employees",
-  "Add Employee",
-  "Update Employee Role",
-  "View All Roles",
-  "Add Role",
-  "View All Departments",
-  "Add Department",
-  "Quit",
-];
-
-inquirer
-  .prompt([
-    {
-      type: "list",
-      message: "What would you like to do?",
-      name: "operation",
-      choices: operationChoices,
-    },
-  ])
-  .then((response) => {
-    console.log(response);
-
-    switch (response.operation) {
-      case "View All Employees":
-        displayTable("employees");
-        break;
-      case "Add Employee":
-        addEmployee();
-        break;
-      case "Update Employee Role":
-        updateEmployeeRole();
-        break;
-      case "View All Roles":
-        displayTable("roles");
-        break;
-      case "Add Role":
-        addRole();
-        break;
-      case "View All Departments":
-        displayTable("departments");
-        break;
-      case "Add Department":
-        addDepartment();
-        break;
-      default:
-        console.log(`Goodbye.`);
-    }
-  });
+function init() {
+  const operationChoices = [
+    "View All Employees",
+    "Add Employee",
+    "Update Employee Role",
+    "View All Roles",
+    "Add Role",
+    "View All Departments",
+    "Add Department",
+    "Quit",
+  ];
+  
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        message: "What would you like to do?",
+        name: "operation",
+        choices: operationChoices,
+      },
+    ])
+    .then((response) => {
+      console.log(response);
+  
+      switch (response.operation) {
+        case "View All Employees":
+          displayTable("employees");
+          break;
+        case "Add Employee":
+          addEmployee();
+          break;
+        case "Update Employee Role":
+          updateEmployeeRole();
+          break;
+        case "View All Roles":
+          displayTable("roles");
+          break;
+        case "Add Role":
+          addRole();
+          break;
+        case "View All Departments":
+          displayTable("departments");
+          break;
+        case "Add Department":
+          addDepartment();
+          break;
+        default:
+          console.log(`Goodbye.`);
+          process.exit();
+      }
+    });
+}
+init()
 
 function addEmployee() {
   let currentRoles = [];
@@ -226,55 +230,59 @@ function addRole() {
 }
 
 function updateEmployeeRole() {
-  let currentRoles = [];
-  db.query("SELECT * FROM roles", function (err, results) {
-    if (err) {
-      console.error(err);
-    } else {
-      results.forEach((result) => {
-        currentRoles.push({ role: result.job_title, roleId: result.id });
-      });
-    }
-  });
-
+  let rolesArray = [];
   let employeesArray = [];
-  db.query("SELECT * FROM employees", function (err, results) {
+
+  db.query("SELECT * FROM roles", function (err, roles) {
     if (err) {
       console.error(err);
     } else {
-      results.forEach((result) => {
-        let fullName = `${result.first_name} ${result.last_name}`;
-        employeesArray.push({ name: fullName, id: result.id });
+      roles.forEach((role) => {
+        rolesArray.push({name: role.job_title, value: role.id});
       });
-    }
-    console.log(employeesArray);
 
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          message: "Which employee's role would you like to update?",
-          name: "employee",
-          choices: employeesArray,
-        },
-        {
-          type: "list",
-          message: "Which role do you want to assign the selected employee?",
-          name: "role",
-          choices: currentRoles,
-        },
-      ])
+      db.query("SELECT * FROM employees", function (err, employees) {
+        if (err) {
+          console.error(err);
+        } else {
+          employees.forEach((employee) => {
+            let fullName = `${employee.first_name} ${employee.last_name}`;
+            employeesArray.push({name: fullName, value: employee.id});
+          });
+
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                message: "Which employee's role do you want to update?",
+                name: "employee",
+                choices: employeesArray,
+              },
+              {
+                type: "list",
+                message: "Which role do you want to assign the selected employee?",
+                name: "role",
+                choices: rolesArray,
+              }
+            ])
       .then((response) => {
         employeesArray.forEach((employee) => {
           if (employee.name === response.employee) {
-            const sql = "UPDATE employees SET role_id = ? WHERE id = ?";
-            const params = [response.employee.id];
-            // TODO: need to grab new role id from role name to pass into the params
-            db.query();
+            rolesArray.forEach((role) => {
+              if (role.name === response.role) {
+                const sql = "UPDATE employees SET role_id = ? WHERE id = ?";
+              const params = [employee.value, response.value];
+              console.log(params)
+              // TODO: need to grab new role id from role name to pass into the params
+              db.query();
+              }
+            })
           }
         });
       });
-  });
+    }});
+  }
+})
 }
 
 function displayTable(choice) {
@@ -287,6 +295,7 @@ function displayTable(choice) {
             console.error(err);
           } else {
             console.table(results);
+            init();
           }
         }
       );
@@ -300,6 +309,7 @@ function displayTable(choice) {
             console.error(err);
           } else {
             console.table(results);
+            init();
           }
         }
       );
@@ -313,9 +323,11 @@ function displayTable(choice) {
             console.error(err);
           } else {
             console.table(results);
+            init();
           }
         }
       );
       break;
   }
 }
+
