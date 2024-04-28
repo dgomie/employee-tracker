@@ -192,11 +192,26 @@ function addRole() {
         type: "input",
         message: "What is the name of the role?",
         name: "roleName",
+        validate: function (input) {
+          if (input) {
+            return true;
+          } else {
+            return "Please provide a role name.";
+          }
+        },
       },
       {
         type: "input",
         message: "What is the salary of the role?",
         name: "roleSalary",
+        validate: function (input) {
+          const value = parseInt(input);
+          if (input && !isNaN(value) && Number.isInteger(value)) {
+            return true;
+          } else {
+            return "Please provide a salary for the role.";
+          }
+        },
       },
       {
         type: "list",
@@ -213,7 +228,6 @@ function addRole() {
             const sql = `INSERT INTO roles (job_title, salary, department_id)
       VALUES (?,?,?)`;
             const params = [newRole.roleName, newRole.roleSalary, result.id];
-            console.log("params", params);
 
             // Create new job row in roles table
             db.query(sql, params, function (err, results) {
@@ -268,19 +282,21 @@ function updateEmployeeRole() {
               },
             ])
             .then((response) => {
-              console.log(response)
               const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
               const params = [response.role, response.employee];
-              db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, params, function (err, results) {
-                if (err) {
-                  console.error(err);
-                } else {
-                  console.log(`Updated employee's role in the database.\n`);
-                  console.log(results)
-                  init();
+              db.query(
+                `UPDATE employees SET role_id = ? WHERE id = ?`,
+                params,
+                function (err, results) {
+                  if (err) {
+                    console.error(err);
+                  } else {
+                    console.log(`Updated employee's role in the database.\n`);
+                    init();
+                  }
                 }
-            })
-          });
+              );
+            });
         }
       });
     }
