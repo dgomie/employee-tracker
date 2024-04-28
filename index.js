@@ -96,11 +96,25 @@ function addEmployee() {
         type: "input",
         message: "What is the employee's first name?",
         name: "firstName",
+        validate: function(input) {
+          if (input) {
+            return true;
+          } else {
+            return "Please enter the employee's first name.";
+          }
+        }
       },
       {
         type: "input",
         message: "What is the employee's last name?",
         name: "lastName",
+        validate: function(input) {
+          if (input) {
+            return true;
+          } else {
+            return "Please enter the employee's last name.";
+          }
+        }
       },
       {
         type: "list",
@@ -158,6 +172,13 @@ function addDepartment() {
         type: "input",
         message: "What is the name of the department?",
         name: "deptName",
+        validate: function(input) {
+          if (input) {
+            return true;
+          } else {
+            return "Please enter a department name.";
+          }
+        }
       },
     ])
     .then((newDepartment) => {
