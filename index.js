@@ -268,25 +268,19 @@ function updateEmployeeRole() {
               },
             ])
             .then((response) => {
-              employeesArray.forEach((employee) => {
-                if (employee.name === response.employee) {
-                  rolesArray.forEach((role) => {
-                    if (role.name === response.role) {
-                      const sql =
-                        "UPDATE employees SET role_id = ? WHERE id = ?";
-                      const params = [employee.value, response.value];
-                      console.log(params);
-                      // TODO: need to grab new role id from role name to pass into the params
-                      db.query();
-                    } else {
-                      console.log("something went wrong")
-                    }
-                  });
+              console.log(response)
+              const sql = `UPDATE employees SET role_id = ? WHERE id = ?`;
+              const params = [response.role, response.employee];
+              db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, params, function (err, results) {
+                if (err) {
+                  console.error(err);
                 } else {
-                  console.log("something went wrong")
+                  console.log(`Updated employee's role in the database.\n`);
+                  console.log(results)
+                  init();
                 }
-              });
-            });
+            })
+          });
         }
       });
     }
