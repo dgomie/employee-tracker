@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const { PASSWORD } = require("./password");
-const header = require('./assets/ascii/header')
+const header = require("./assets/ascii/header");
 
 const db = mysql.createConnection(
   {
@@ -12,7 +12,6 @@ const db = mysql.createConnection(
   },
   console.log(`Connected to the dunder_db database.`)
 );
-console.log(header)
 
 function init() {
   const operationChoices = [
@@ -25,7 +24,7 @@ function init() {
     "Add Department",
     "Quit",
   ];
-  
+
   inquirer
     .prompt([
       {
@@ -37,7 +36,7 @@ function init() {
     ])
     .then((response) => {
       console.log(response);
-  
+
       switch (response.operation) {
         case "View All Employees":
           displayTable("employees");
@@ -66,7 +65,6 @@ function init() {
       }
     });
 }
-init()
 
 function addEmployee() {
   let currentRoles = [];
@@ -241,7 +239,7 @@ function updateEmployeeRole() {
       console.error(err);
     } else {
       roles.forEach((role) => {
-        rolesArray.push({name: role.job_title, value: role.id});
+        rolesArray.push({ name: role.job_title, value: role.id });
       });
 
       db.query("SELECT * FROM employees", function (err, employees) {
@@ -250,7 +248,7 @@ function updateEmployeeRole() {
         } else {
           employees.forEach((employee) => {
             let fullName = `${employee.first_name} ${employee.last_name}`;
-            employeesArray.push({name: fullName, value: employee.id});
+            employeesArray.push({ name: fullName, value: employee.id });
           });
 
           inquirer
@@ -263,29 +261,36 @@ function updateEmployeeRole() {
               },
               {
                 type: "list",
-                message: "Which role do you want to assign the selected employee?",
+                message:
+                  "Which role do you want to assign the selected employee?",
                 name: "role",
                 choices: rolesArray,
-              }
+              },
             ])
-      .then((response) => {
-        employeesArray.forEach((employee) => {
-          if (employee.name === response.employee) {
-            rolesArray.forEach((role) => {
-              if (role.name === response.role) {
-                const sql = "UPDATE employees SET role_id = ? WHERE id = ?";
-              const params = [employee.value, response.value];
-              console.log(params)
-              // TODO: need to grab new role id from role name to pass into the params
-              db.query();
-              }
-            })
-          }
-        });
+            .then((response) => {
+              employeesArray.forEach((employee) => {
+                if (employee.name === response.employee) {
+                  rolesArray.forEach((role) => {
+                    if (role.name === response.role) {
+                      const sql =
+                        "UPDATE employees SET role_id = ? WHERE id = ?";
+                      const params = [employee.value, response.value];
+                      console.log(params);
+                      // TODO: need to grab new role id from role name to pass into the params
+                      db.query();
+                    } else {
+                      console.log("something went wrong")
+                    }
+                  });
+                } else {
+                  console.log("something went wrong")
+                }
+              });
+            });
+        }
       });
-    }});
-  }
-})
+    }
+  });
 }
 
 function displayTable(choice) {
@@ -334,3 +339,6 @@ function displayTable(choice) {
   }
 }
 
+// initialize program
+console.log(header);
+init();
