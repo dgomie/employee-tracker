@@ -145,7 +145,6 @@ function addEmployee() {
                   result.id,
                   newEmployeeManagerId,
                 ];
-                console.log("params", params);
 
                 db.query(sql, params, function (err, results) {
                   if (err) {
