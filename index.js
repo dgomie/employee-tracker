@@ -35,8 +35,6 @@ function init() {
       },
     ])
     .then((response) => {
-      console.log(response);
-
       switch (response.operation) {
         case "View All Employees":
           displayTable("employees");
@@ -341,7 +339,7 @@ function displayTable(choice) {
 
     case "roles":
       db.query(
-        "SELECT r.job_title, d.department_name, r.salary FROM departments d JOIN roles r ON d.id = r.department_id",
+        "SELECT r.id, r.job_title, d.department_name, r.salary FROM departments d JOIN roles r ON d.id = r.department_id",
         function (err, results) {
           if (err) {
             console.error(err);
@@ -355,7 +353,7 @@ function displayTable(choice) {
 
     default:
       db.query(
-        `SELECT d.id, d.department_name name FROM departments d`,
+        `SELECT d.id, d.department_name FROM departments d`,
         function (err, results) {
           if (err) {
             console.error(err);

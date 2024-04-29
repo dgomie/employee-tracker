@@ -46,7 +46,7 @@ Selecting the ```Quit``` option will terminate the program.
 
 A video walkthrough of this application can be found here:
 
-https://drive.google.com/file/d/1ogI1H8yBaPHsIV_L_eO1aryUfKFenUKd/view?usp=sharing
+https://drive.google.com/file/d/1fDujtJiXg9XZieAujVzMy1WEG0Kfy6Af/view?usp=sharing
 
 ## Contributions
 

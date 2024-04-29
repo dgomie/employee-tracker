@@ -20,7 +20,7 @@ VALUES (1, "Salesperson", 85000),
 INSERT INTO employees (first_name, last_name, manager_id, role_id)
 VALUES ("Michael", "Scott", NULL, 6),
     ("Jim", "Halpert", 1, 1),
-    ("Dwight", "Schrute", 1, 7),
+    ("Dwight", "Schrute", 1, 1),
     ("Pam", "Beesly", 1, 2),
     ("Angela", "Martin", 1, 4),
     ("Kelly", "Kapoor", 1, 3),
