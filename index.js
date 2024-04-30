@@ -13,6 +13,7 @@ const db = mysql.createConnection(
   console.log(`Connected to the dunder_db database.`)
 );
 
+//initializes program
 function init() {
   const operationChoices = [
     "View All Employees",
@@ -24,7 +25,7 @@ function init() {
     "Add Department",
     "Quit",
   ];
-
+  //prompts user for inital operation
   inquirer
     .prompt([
       {
@@ -35,6 +36,7 @@ function init() {
       },
     ])
     .then((response) => {
+      // switch statement directs user's response to corresponding function
       switch (response.operation) {
         case "View All Employees":
           displayTable("employees");
@@ -64,7 +66,9 @@ function init() {
     });
 }
 
+// adds employee to database
 function addEmployee() {
+  //pulling current roles from database to use in inquirer prompt list
   let currentRoles = [];
   db.query("SELECT * FROM roles", function (err, results) {
     if (err) {
@@ -75,7 +79,7 @@ function addEmployee() {
       });
     }
   });
-
+  // pulling current employees to use in inquirer prompt list
   let employeesArray = [{ name: "none", id: null }];
   db.query("SELECT * FROM employees", function (err, results) {
     if (err) {
@@ -128,13 +132,13 @@ function addEmployee() {
       },
     ])
     .then((newEmployee) => {
+      //pulling all roles from database
       db.query("SELECT * FROM roles", function (err, results) {
         0;
-        results.forEach((result) => {
-          // compare the selected name to name in database in order to pull dept_id
+        results.forEach((result) => { //iterating through database roles and comparing job title to the new employee role to get role_id
           if (result.job_title === newEmployee.role) {
-            employeesArray.forEach((employee) => {
-              if (employee.name === newEmployee.manager) {
+            employeesArray.forEach((employee) => {//iterating through employees 
+              if (employee.name === newEmployee.manager) {//comparing if the name matches the new employee's manager
                 let newEmployeeManagerId = employee.id;
                 const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id)VALUES (?,?,?,?)`; //need to add manager_id and role_id
                 const params = [
@@ -143,7 +147,7 @@ function addEmployee() {
                   result.id,
                   newEmployeeManagerId,
                 ];
-
+                //inserting the new employee data into the employee database
                 db.query(sql, params, function (err, results) {
                   if (err) {
                     console.error(err);
@@ -162,6 +166,7 @@ function addEmployee() {
     });
 }
 
+//adding department to departments_db
 function addDepartment() {
   inquirer
     .prompt([
@@ -193,7 +198,9 @@ function addDepartment() {
     });
 }
 
+// adding role to roles_db
 function addRole() {
+  //creating array to contain all the departments for use in the inquirer prompt
   let currentDept = [];
   db.query("SELECT * FROM departments", function (err, results) {
     if (err) {
@@ -223,10 +230,13 @@ function addRole() {
         message: "What is the salary of the role?",
         name: "roleSalary",
         validate: function (input) {
+          // convert prompt to int
           const value = parseInt(input);
+          //check if input is a int or NaN
           if (input && !isNaN(value) && Number.isInteger(value)) {
             return true;
           } else {
+            //User doesn't input a number value
             return "Please provide a salary for the role.";
           }
         },
@@ -262,6 +272,7 @@ function addRole() {
     });
 }
 
+// update employee's role information in the employee_db
 function updateEmployeeRole() {
   let rolesArray = [];
   let employeesArray = [];
@@ -321,6 +332,7 @@ function updateEmployeeRole() {
   });
 }
 
+//display tables for each database, choice is passed through via the init() switch statement
 function displayTable(choice) {
   switch (choice) {
     case "employees":
